@@ -69,14 +69,14 @@ export default function App() {
     return { updatedHex: hex.substring(0, startIndex) + extractedHex + hex.substring(endIndex), changesCount };
   };
 
-  const saveFile = (hexData) => {
+  const saveFile = (hexData, username) => {
     const byteArray = new Uint8Array(hexData.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
     const blob = new Blob([byteArray], { type: "application/octet-stream" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "Profile_"+username+".data";
+    link.download = selectedFile.name; // User-defined filename
     document.body.appendChild(link);
-    link.click();
+    link.click(); // This triggers the file download dialog
     document.body.removeChild(link);
   };
   const handleUnlock = () => {
