@@ -9,7 +9,7 @@ const hexToString = (hex) => {
 };
 
 export default function App() {
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setFile] = useState(null);
   const [username, setUsername] = useState("Your name will be here (* ^ ω ^)");
   const [unlockBalls, setUnlockBalls] = useState(true);
   
@@ -20,8 +20,8 @@ export default function App() {
 
   const handleFileSelect = (event) => {
     const selectedFile = event.target.files[0];
-    setFileName(selectedFile?.name);
-    console.log(fileName);
+    // setFileName(selectedFile?.name);
+    // console.log(fileName);
     if (!selectedFile) return;
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -53,43 +53,61 @@ export default function App() {
       alert(`Markers '${startMarker}' - '${endMarker}' not found!`);
       return hex;
     }
+  
     let extractedHex = hex.substring(startIndex, endIndex);
+    let changesCount = 0;
+  
+    // Apply the replacements and count the changes
     for (const [oldVal, newVal] of Object.entries(replacements)) {
-      extractedHex = extractedHex.split(oldVal).join(newVal);
+      const occurences = (extractedHex.split(oldVal).length - 1);
+      if (occurences > 0) {
+        changesCount += occurences;
+        extractedHex = extractedHex.split(oldVal).join(newVal);
+      }
     }
-    return hex.substring(0, startIndex) + extractedHex + hex.substring(endIndex);
+  
+    return { updatedHex: hex.substring(0, startIndex) + extractedHex + hex.substring(endIndex), changesCount };
   };
+
   const saveFile = (hexData) => {
     const byteArray = new Uint8Array(hexData.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
     const blob = new Blob([byteArray], { type: "application/octet-stream" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "unlocked_data.data";
+    link.download = "Profile_"+username+".data";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
   const handleUnlock = () => {
-    if (!file || !hexData) {
+    if (!selectedFile || !hexData) {
       alert("Please select a file first!");
       return;
     }
     let newHexData = hexData;
+    let ballsChanges = 0;
+    let puttersChanges = 0;
+
     if (unlockPutters) {
-      newHexData = modifyHexSection(newHexData, "50757474657273556e6c6f636b6564", "436f7572736544617461", {
+      const result = modifyHexSection(newHexData, "50757474657273556e6c6f636b6564", "436f7572736544617461", {
         "56616c7565000008": "56616c7565000108",
         "48617356616c7565000009": "48617356616c7565000109",
       });
+      newHexData = result.updatedHex;
+      puttersChanges += result.changesCount;
     }
     if (unlockBalls) {
-      newHexData = modifyHexSection(newHexData, "42616c6c73466f756e64", "42616c6c506f736974696f6e73", {
+      const result = modifyHexSection(newHexData, "42616c6c73466f756e64", "42616c6c506f736974696f6e73", {
         "48617356616c7565000009": "48617356616c7565000109",
         "56616c756500ffffffffffffffff08": "56616c756500000000000000000008",
       });
+      newHexData = result.updatedHex;
+      ballsChanges += result.changesCount;
     }
     setHexData(newHexData);
     saveFile(newHexData);
-    alert("Unlocked Successfully! File saved.");
+
+    alert(`Unlocked Successfully! \n\nBalls unlocked: ${Math.floor(ballsChanges / 2)}\nPutters unlocked: ${Math.floor(puttersChanges / 2)}\n\n File saved.`);
   };
   
 
@@ -109,21 +127,42 @@ export default function App() {
         </button>
         <button 
           className="bg-gray-700 px-4 py-1 rounded"
+          onClick={() => window.open("https://github.com/K1TTYBLACK/WalkaboutMiniGolf-Unlocker-WEB", "_blank")}
+        >
+          GitHub (WebApp)
+        </button>
+        <button 
+          className="bg-gray-700 px-4 py-1 rounded"
           onClick={() => window.open("https://horizon.meta.com/profile/112795680903761/", "_blank")}
         >
           Meta
         </button>
       </div>
-
       <div className="bg-gray-800 p-4 mt-4 rounded-lg w-full max-w-md">
-        <div className="text-sm font-semibold">1. Profile</div>
+        <div className="text-sm font-semibold">1. Instructions</div>
+        <br></br>
+        <p className="text-xs mt-1">1. Quit game</p>
+        <p className="text-xs mt-1">2. If you use Meta Quest, connect it to your device and copy file:</p>
+        <p className="text-xs mt-1 mx-5"><b>Oculus:</b> Android/data/com.MightyCoconut.WalkaboutMiniGolf/files/Profiles/Oculus/XXXXXXXXXXXXX/Player_XXXXXXX.data</p>
+        <p className="text-xs mt-1 mx-5"><b>Steam/Quest Link:</b>  %USERPROFILE%\AppData\LocalLow\Mighty Coconut\Walkabout Mini Golf\Profiles</p>
+        <p className="text-xs mt-1">3. <b>⚠️ Disable internet on device you play golf on.</b></p>
+        <p className="text-xs mt-1">4. Import <b>Player_XXXXXXX.data</b> here and click UNLOCK.</p>
+        <p className="text-xs mt-1">5. Replace modified file in directory you got it from.</p>
+        <p className="text-xs mt-1">6. Launch Walkabout Mini Golf <b>with internet off</b>.</p>
+        <p className="text-xs mt-1">7. Ensure everything is unlocked and <b>enable internet while in game</b>.</p>
+        <p className="text-xs mt-1">8. <b>Join any multiplayer match.</b></p>
+
+      </div>
+      <div className="bg-gray-800 p-4 mt-4 rounded-lg w-full max-w-md">
+        <div className="text-sm font-semibold">2. Import profile</div>
         <p className="text-xs mt-1">Select "Profile_Default.data" or "Profile_XXXXXX.data"</p>
         <div className="flex space-x-2 mt-2">
           <input
             type="file"
             className="hidden"
             ref={fileInputRef}
-            onChange={(e) => setSelectedFile(e.target.files[0])}
+            onChange={handleFileSelect}
+            accept=".data"
           />
           <input
             type="text"
@@ -145,26 +184,30 @@ export default function App() {
       </div>
 
       <div className="bg-gray-800 p-4 mt-4 rounded-lg w-full max-w-md">
-        <div className="text-sm font-semibold">2. Unlocker</div>
+        <div className="text-sm font-semibold">3. Unlocker</div>
         <div className="flex flex-col mt-2 space-y-2">
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={unlockBalls}
-              onChange={() => setUnlockBalls(!unlockBalls)}
-            />
-            <span>Unlock balls</span>
-          </label>
-          <label className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              checked={unlockPutters}
-              onChange={() => setUnlockPutters(!unlockPutters)}
-            />
-            <span>Unlock putters</span>
-          </label>
+        <label className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={unlockBalls}
+            onChange={() => setUnlockBalls(!unlockBalls)}
+            className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
+          />
+          <span>Unlock balls</span>
+        </label>
+        <label className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={unlockPutters}
+            onChange={() => setUnlockPutters(!unlockPutters)}
+            className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
+          />
+          <span>Unlock putters</span>
+        </label>    
         </div>
-        <button className="bg-gray-700 w-full mt-2 py-2 rounded">UNLOCK</button>
+        <button className="bg-gray-700 w-full mt-2 py-2 rounded" onClick={handleUnlock}>
+          UNLOCK & SAVE
+        </button>
       </div>
     </div>
   );
