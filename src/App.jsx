@@ -113,7 +113,7 @@ export default function App() {
 
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-8 ">
       <div className="text-center text-xl font-bold">Walkabout Mini Golf</div>
       <div className="text-center text-lg font-semibold">BALLS & PUTTERS UNLOCKER</div>
       <div className="text-center text-sm mt-1">by K1TTYBLACK</div>
