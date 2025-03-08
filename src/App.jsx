@@ -14,6 +14,7 @@ export default function App() {
   const [unlockBalls, setUnlockBalls] = useState(true);
   
   const [unlockPutters, setUnlockPutters] = useState(true);
+  const [unlockCourses, setUnlockCourses] = useState(true);
   const [hexData, setHexData] = useState("");
   const fileInputRef = React.useRef(null);
 
@@ -48,11 +49,13 @@ export default function App() {
 
   const modifyHexSection = (hex, startMarker, endMarker, replacements) => {
     let startIndex = hex.indexOf(startMarker);
-    let endIndex = hex.indexOf(endMarker);
-    if (startIndex === -1 || endIndex === -1 || startIndex >= endIndex) {
-      alert(`Markers '${startMarker}' - '${endMarker}' not found!`);
-      return hex;
+    if (startIndex === -1) {
+        alert(`Start marker '${startMarker}' not found!`);
+        return hex;
     }
+
+    let endIndex = endMarker ? hex.indexOf(endMarker, startIndex) : -1;
+    if (endIndex === -1) endIndex = hex.length;
   
     let extractedHex = hex.substring(startIndex, endIndex);
     let changesCount = 0;
@@ -88,6 +91,9 @@ export default function App() {
     let ballsChanges = 0;
     let puttersChanges = 0;
 
+    let coursesPurchasesChanges = 0;
+    let coursesUnlockChanges = 0;
+
     if (unlockPutters) {
       const result = modifyHexSection(newHexData, "50757474657273556e6c6f636b6564", "436f7572736544617461", {
         "56616c7565000008": "56616c7565000108",
@@ -104,10 +110,28 @@ export default function App() {
       newHexData = result.updatedHex;
       ballsChanges += result.changesCount;
     }
+    
+    if (unlockCourses) {
+      const result = modifyHexSection(newHexData, "436f7572736544617461", "436f736d657469635061636b44617461", {
+        "4973507572636861736564002b0000000856616c756500000848617356616c7565000009": "4973507572636861736564002b0000000856616c756500010848617356616c7565000109",
+        "4973507572636861736564002b0000000856616c7565000008": "4973507572636861736564002b0000000856616c7565000108",
+      });
+      newHexData = result.updatedHex;
+      coursesPurchasesChanges += result.changesCount;
+    }
+    if (unlockCourses) {
+      const result = modifyHexSection(newHexData, "436f7572736544617461", "436f736d657469635061636b44617461", {
+        "4973556e6c6f636b6564002b0000000856616c756500000848617356616c7565000009": "4973556e6c6f636b6564002b0000000856616c756500010848617356616c7565000109",
+        "4973556e6c6f636b6564002b0000000856616c7565000008": "4973556e6c6f636b6564002b0000000856616c7565000108",
+      });
+      newHexData = result.updatedHex;
+      coursesUnlockChanges += result.changesCount;
+    }
+
     setHexData(newHexData);
     saveFile(newHexData);
 
-    alert(`Unlocked Successfully! \n\nBalls unlocked: ${Math.floor(ballsChanges / 2)}\nPutters unlocked: ${Math.floor(puttersChanges / 2)}\n\n File saved.`);
+    alert(`Unlocked Successfully! \n\nBalls unlocked: ${Math.floor(ballsChanges / 2)}\nPutters unlocked: ${Math.floor(puttersChanges / 2)}\n\nCourses illegally bought: ${Math.floor(coursesPurchasesChanges / 2)}\nCourses unlocked: ${Math.floor(coursesUnlockChanges / 2)}\n\n File saved.`);
   };
   
 
@@ -119,17 +143,17 @@ export default function App() {
       <div className="text-center text-sm mt-1">by K1TTYBLACK</div>
 
       <div className="flex space-x-2 mt-2">
-        <button 
+        {/* <button 
           className="bg-gray-700 px-4 py-1 rounded"
           onClick={() => window.open("https://github.com/K1TTYBLACK/WalkaboutMiniGolf-Unlocker", "_blank")}
         >
           GitHub
-        </button>
+        </button> */}
         <button 
           className="bg-gray-700 px-4 py-1 rounded"
           onClick={() => window.open("https://github.com/K1TTYBLACK/WalkaboutMiniGolf-Unlocker-WEB", "_blank")}
         >
-          GitHub (WebApp)
+          GitHub
         </button>
         <button 
           className="bg-gray-700 px-4 py-1 rounded"
@@ -204,6 +228,16 @@ export default function App() {
           />
           <span>Unlock putters</span>
         </label>    
+        <label className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={unlockCourses}
+            onChange={() => setUnlockCourses(!unlockCourses)}
+            className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
+          />
+          <span>UNLOCK PAID COURSES</span>
+          <span className="text-xs mt-1 text-gray-500">(import "Profile_Default.data")</span>
+        </label>
         </div>
         <button className="bg-gray-700 w-full mt-2 py-2 rounded" onClick={handleUnlock}>
           UNLOCK & SAVE
