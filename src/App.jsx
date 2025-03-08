@@ -7,14 +7,30 @@ const hexToString = (hex) => {
     .map((byte) => String.fromCharCode(parseInt(byte, 16)))
     .join("");
 };
-
+const AlertBox = ({ title, message, onClose }) => {
+  return (
+    <div className="fixed inset-0 bg-[rgba(0,0,0,0.7)] flex items-center justify-center">
+      <div className="bg-gray-800 p-6  text-center w-80 rounded-2xl">
+        <div className="mb-4 text-m font-semibold text-white whitespace-pre-line">{title}</div>
+        <div className="mb-4 text-m text-white whitespace-pre-line text-left">{message}</div>
+        <button onClick={onClose} className="w-full bg-blue-500 text-white py-2 rounded-lg">OK</button>
+      </div>
+    </div>
+  );
+};
 export default function App() {
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertTitle, setAlertTitle] = useState('');
+
   const [selectedFile, setFile] = useState(null);
   const [username, setUsername] = useState("Your name will be here (* ^ ω ^)");
   const [unlockBalls, setUnlockBalls] = useState(true);
   
+  
   const [unlockPutters, setUnlockPutters] = useState(true);
   const [unlockCourses, setUnlockCourses] = useState(true);
+  const [buyCourses, setBuyCourses] = useState(true);
   const [hexData, setHexData] = useState("");
   const fileInputRef = React.useRef(null);
 
@@ -84,7 +100,10 @@ export default function App() {
   };
   const handleUnlock = () => {
     if (!selectedFile || !hexData) {
-      alert("Please select a file first!");
+      setAlertTitle("Please select a file first!");
+      setAlertMessage(''); 
+      setAlertOpen(true);
+      //alert("Please select a file first!");
       return;
     }
     let newHexData = hexData;
@@ -111,7 +130,7 @@ export default function App() {
       ballsChanges += result.changesCount;
     }
     
-    if (unlockCourses) {
+    if (buyCourses) {
       const result = modifyHexSection(newHexData, "436f7572736544617461", "436f736d657469635061636b44617461", {
         "4973507572636861736564002b0000000856616c756500000848617356616c7565000009": "4973507572636861736564002b0000000856616c756500010848617356616c7565000109",
         "4973507572636861736564002b0000000856616c7565000008": "4973507572636861736564002b0000000856616c7565000108",
@@ -131,15 +150,18 @@ export default function App() {
     setHexData(newHexData);
     saveFile(newHexData);
 
-    alert(`Unlocked Successfully! \n\nBalls unlocked: ${Math.floor(ballsChanges / 2)}\nPutters unlocked: ${Math.floor(puttersChanges / 2)}\n\nCourses illegally bought: ${Math.floor(coursesPurchasesChanges / 2)}\nCourses unlocked: ${Math.floor(coursesUnlockChanges / 2)}\n\n File saved.`);
+    setAlertTitle("Success!");
+    setAlertMessage(`Balls unlocked: ${Math.floor(ballsChanges / 2)}\nPutters unlocked: ${Math.floor(puttersChanges / 2)}\n\nPaid courses unlocked: ${Math.floor(coursesPurchasesChanges / 2)}\nHard courses unlocked: ${Math.floor(coursesUnlockChanges / 2)}\n\n File saved!\n\nReplace original file on your headset/device with new one`); 
+    setAlertOpen(true);
   };
   
 
   
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-8 ">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-8 m-5 rounded-3xl">
+      {alertOpen && <AlertBox title={alertTitle} message={alertMessage} onClose={() => setAlertOpen(false)} />}
       <div className="text-center text-xl font-bold">Walkabout Mini Golf</div>
-      <div className="text-center text-lg font-semibold">BALLS & PUTTERS UNLOCKER</div>
+      <div className="text-center text-lg font-semibold">UNLOCKER</div>
       <div className="text-center text-sm mt-1">by K1TTYBLACK</div>
 
       <div className="flex space-x-2 mt-2">
@@ -162,6 +184,7 @@ export default function App() {
           Meta
         </button>
       </div>
+      <div className="text-center text-sm mt-1">Last updated: 7th of March 2025 (game version v5.7) </div>
       <div className="bg-gray-800 p-4 mt-4 rounded-lg w-full max-w-md">
         <div className="text-sm font-semibold">1. Instructions</div>
         <br></br>
@@ -173,13 +196,13 @@ export default function App() {
         <p className="text-xs mt-1">4. Import <b>Player_XXXXXXX.data</b> here and click UNLOCK.</p>
         <p className="text-xs mt-1">5. Replace modified file in directory you got it from.</p>
         <p className="text-xs mt-1">6. Launch Walkabout Mini Golf <b>with internet off</b>.</p>
-        <p className="text-xs mt-1">7. Ensure everything is unlocked and <b>enable internet while in game</b>.</p>
-        <p className="text-xs mt-1">8. <b>Join any multiplayer match.</b></p>
+        <p className="text-xs mt-1">7. ⚠️ Ensure everything is unlocked and <b>enable internet while in game</b>.</p>
+        <p className="text-xs mt-1">8. ⚠️ <b>Join any multiplayer match.</b></p>
 
       </div>
       <div className="bg-gray-800 p-4 mt-4 rounded-lg w-full max-w-md">
         <div className="text-sm font-semibold">2. Import profile</div>
-        <p className="text-xs mt-1">Select "Profile_Default.data" or "Profile_XXXXXX.data"</p>
+        <p className="text-xs mt-1">Select "Profile_Default.data"  or "Profile_XXXXXX.data"</p>
         <div className="flex space-x-2 mt-2">
           <input
             type="file"
@@ -227,12 +250,21 @@ export default function App() {
             className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
           />
           <span>Unlock putters</span>
-        </label>    
+        </label>   
         <label className="flex items-center space-x-2 cursor-pointer">
           <input
             type="checkbox"
             checked={unlockCourses}
             onChange={() => setUnlockCourses(!unlockCourses)}
+            className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
+          />
+          <span>Unlock "hard" courses</span>
+        </label> 
+        <label className="flex items-center space-x-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={buyCourses}
+            onChange={() => setBuyCourses(!buyCourses)}
             className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
           />
           <span>UNLOCK PAID COURSES</span>
@@ -242,6 +274,12 @@ export default function App() {
         <button className="bg-gray-700 w-full mt-2 py-2 rounded" onClick={handleUnlock}>
           UNLOCK & SAVE
         </button>
+
+
+        <div>
+
+      
+    </div>
       </div>
     </div>
   );
