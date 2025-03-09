@@ -270,7 +270,7 @@ export default function App() {
             className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
           />
           <span>Unlock Paid courses</span>
-          <span className="text-xs mt-1 text-gray-500">(Illegal. Use at your own risk.)</span>
+          <span className="text-xs mt-1 text-gray-500">(Illegal. Use at your own risk. Only works until you restart)</span>
         </label>
         </div>
         <button className="bg-gray-700 w-full mt-2 py-2 rounded" onClick={handleUnlock}>
