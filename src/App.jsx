@@ -67,7 +67,7 @@ export default function App() {
     let startIndex = hex.indexOf(startMarker);
     if (startIndex === -1) {
         setAlertTitle("Error!");
-        setAlertMessage(`"`+selectedFile+`" doesn't look like Walkabout Mini Golf profile file.\n\nPlease select correct file!`); 
+        setAlertMessage(`"`+selectedFile.name+`" doesn't look like Walkabout Mini Golf profile file.\n\nPlease select correct file!`); 
         setAlertOpen(true);
         return hex;
     }
@@ -270,7 +270,7 @@ export default function App() {
             className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
           />
           <span>Unlock Paid courses</span>
-          <span className="text-xs mt-1 text-gray-500">(Illegal. Use at your own risk.")</span>
+          <span className="text-xs mt-1 text-gray-500">(Illegal. Use at your own risk.)</span>
         </label>
         </div>
         <button className="bg-gray-700 w-full mt-2 py-2 rounded" onClick={handleUnlock}>
