@@ -66,7 +66,9 @@ export default function App() {
   const modifyHexSection = (hex, startMarker, endMarker, replacements) => {
     let startIndex = hex.indexOf(startMarker);
     if (startIndex === -1) {
-        alert(`Start marker '${startMarker}' not found!`);
+        setAlertTitle("Doesn't look like Walkabout Mini Golf profile file.\n\nPlease select correct file!");
+        setAlertMessage(``); 
+        setAlertOpen(true);
         return hex;
     }
 
