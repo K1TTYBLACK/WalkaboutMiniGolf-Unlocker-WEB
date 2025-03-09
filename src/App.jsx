@@ -30,7 +30,7 @@ export default function App() {
   
   const [unlockPutters, setUnlockPutters] = useState(true);
   const [unlockCourses, setUnlockCourses] = useState(true);
-  const [buyCourses, setBuyCourses] = useState(true);
+  const [buyCourses, setBuyCourses] = useState(false);
   const [hexData, setHexData] = useState("");
   const fileInputRef = React.useRef(null);
 
@@ -269,8 +269,8 @@ export default function App() {
             onChange={() => setBuyCourses(!buyCourses)}
             className="h-5 w-5 cursor-pointer" // Making the checkbox bigger
           />
-          <span>UNLOCK PAID COURSES</span>
-          <span className="text-xs mt-1 text-gray-500">(import "Profile_Default.data")</span>
+          <span>Unlock Paid courses</span>
+          <span className="text-xs mt-1 text-gray-500">(Illegal. Use at your own risk.")</span>
         </label>
         </div>
         <button className="bg-gray-700 w-full mt-2 py-2 rounded" onClick={handleUnlock}>
